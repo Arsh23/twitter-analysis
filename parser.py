@@ -4,14 +4,12 @@ from lxml import html
 
 
 def parse_text(tweet):
-    text = list()
+    text = ''
     for elem in tweet.xpath('.//p[contains(@class, "tweet-text")]/node()'):
-        if isinstance(elem, html.HtmlElement):
-            if elem.tag == 'a':
-                text += [' ', ''.join(elem.xpath('.//text()')), ' ']
+        if isinstance(elem, html.HtmlElement) and elem.tag == 'a':
+            text += ' '+''.join(elem.xpath('.//text()'))+' '
         else:
-            text += [' ', elem, ' ']
-    text = ''.join(text)
+            text += ' '+elem+' '
     text = ' '.join(text.split())
     text = text.encode('ascii', 'replace')
     return text
@@ -26,8 +24,18 @@ def parse_time(tweet):
 
 
 def parse_tweets(tweets):
+    parsed_tweets = list()
     for t in tweets:
         tweet = dict()
         tweet['text'] = parse_text(t)
         tweet['time'] = parse_time(t)
-        # tweet['time'] = apply regex
+
+        rt_xpath = './/button[contains(@class,"js-actionRetweet")]'\
+                   '//div[@class="IconTextContainer"]/span/span/text()'
+        tweet['retweets'] = t.xpath(rt_xpath)[0]
+
+        lk_xpath = './/button[contains(@class,"js-actionFavorite")]'\
+                   '//div[@class="IconTextContainer"]/span/span/text()'
+        tweet['likes'] = t.xpath(lk_xpath)[0]
+        parsed_tweets.append(tweet)
+    return parsed_tweets
