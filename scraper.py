@@ -1,10 +1,9 @@
 
 import time
-# import requests
 from lxml import html
 
 from selenium import webdriver
-# from selenium.webdriver.common.keys import Keys
+from parser import parse_tweets
 
 url = 'https://twitter.com/DelhiPolice'
 
@@ -12,28 +11,6 @@ url = 'https://twitter.com/DelhiPolice'
 def get_tweet_objs(driver):
     tree = html.fromstring(driver.page_source)
     return tree.xpath('//li[@data-item-type="tweet"]')
-
-
-def parse_text(tweet):
-    text = list()
-    for elem in tweet.xpath('.//p[contains(@class, "tweet-text")]/node()'):
-        if isinstance(elem, html.HtmlElement):
-            if elem.tag == 'a':
-                text += [' ', ''.join(elem.xpath('.//text()')), ' ']
-        else:
-            text += [' ', elem, ' ']
-    text = ''.join(text)
-    text = ' '.join(text.split())
-    text = text.encode('ascii', 'replace')
-    return text
-
-
-def parse_tweets(tweets):
-    for t in tweets:
-        tweet = dict()
-        tweet['text'] = parse_text(t)
-        # time = t.xpath('.//small[@class="time"]/a/@title')
-        # tweet['time'] = apply regex
 
 
 def extract_tweets(driver, user, num):
