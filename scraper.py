@@ -1,5 +1,4 @@
 
-
 import time
 # import requests
 from lxml import html
@@ -31,8 +30,10 @@ def parse_text(tweet):
 
 def parse_tweets(tweets):
     for t in tweets:
-        # tweet = dict()
-        print(parse_text(t))
+        tweet = dict()
+        tweet['text'] = parse_text(t)
+        # time = t.xpath('.//small[@class="time"]/a/@title')
+        # tweet['time'] = apply regex
 
 
 def extract_tweets(driver, user, num):
