@@ -6,8 +6,9 @@ from lxml import html
 def parse_text(tweet):
     text = ''
     for elem in tweet.xpath('.//p[contains(@class, "tweet-text")]/node()'):
-        if isinstance(elem, html.HtmlElement) and elem.tag == 'a':
-            text += ' '+''.join(elem.xpath('.//text()'))+' '
+        if isinstance(elem, html.HtmlElement):
+            if elem.tag == 'a':
+                text += ' '+''.join(elem.xpath('.//text()'))+' '
         else:
             text += ' '+elem+' '
     text = ' '.join(text.split())
@@ -32,12 +33,12 @@ def parse_tweets(tweets, user):
         tweet['time'] = parse_time(t)
 
         rt_xpath = './/button[contains(@class,"js-actionRetweet")]'\
-                   '//div[@class="IconTextContainer"]/span/span/text()'
-        tweet['retweets'] = t.xpath(rt_xpath)[0]
+                   '//div[@class="IconTextContainer"]//span/text()'
+        tweet['retweets'] = t.xpath(rt_xpath)[1]
 
         lk_xpath = './/button[contains(@class,"js-actionFavorite")]'\
-                   '//div[@class="IconTextContainer"]/span/span/text()'
-        tweet['likes'] = t.xpath(lk_xpath)[0]
+                   '//div[@class="IconTextContainer"]//span/text()'
+        tweet['likes'] = t.xpath(lk_xpath)[1]
 
         link_xpath = './/ancestor::div[contains(@class,"tweet")]'\
                      '/@data-permalink-path'
