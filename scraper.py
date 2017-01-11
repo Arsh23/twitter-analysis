@@ -5,8 +5,6 @@ from lxml import html
 from selenium import webdriver
 from parser import parse_tweets
 
-url = 'https://twitter.com/DelhiPolice'
-
 
 def get_tweet_objs(driver):
     tree = html.fromstring(driver.page_source)
@@ -38,7 +36,7 @@ def extract_tweets(driver, user, num):
             break
 
     tweets = [x[0] for x in tweets]
-    return parse_tweets(tweets)
+    return parse_tweets(tweets, user)
 
 
 if __name__ == '__main__':

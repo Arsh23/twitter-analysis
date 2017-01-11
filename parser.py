@@ -23,10 +23,11 @@ def parse_time(tweet):
     return t
 
 
-def parse_tweets(tweets):
+def parse_tweets(tweets, user):
     parsed_tweets = list()
     for t in tweets:
         tweet = dict()
+        tweet['user'] = user
         tweet['text'] = parse_text(t)
         tweet['time'] = parse_time(t)
 
@@ -37,5 +38,16 @@ def parse_tweets(tweets):
         lk_xpath = './/button[contains(@class,"js-actionFavorite")]'\
                    '//div[@class="IconTextContainer"]/span/span/text()'
         tweet['likes'] = t.xpath(lk_xpath)[0]
+
+        link_xpath = './/ancestor::div[contains(@class,"tweet")]'\
+                     '/@data-permalink-path'
+        tweet['link'] = t.xpath(link_xpath)[0]
+
+        hashtag_xpath = './/a[contains(@class,"twitter-hashtag")]/b/text()'
+        tweet['hashtags'] = ['#'+x.lower() for x in t.xpath(hashtag_xpath)]
+
+        imgs = t.xpath('.//div[contains(@class,"AdaptiveMedia")]')
+        tweet['contains_imgs'] = True if imgs else False
+
         parsed_tweets.append(tweet)
     return parsed_tweets
