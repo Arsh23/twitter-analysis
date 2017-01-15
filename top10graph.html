@@ -1,0 +1,147 @@
+
+<html>
+
+<head>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<script src="https://cdn.rawgit.com/jasondavies/d3-cloud/f00a5113/build/d3.layout.cloud.js">
+
+	</script>
+
+
+	<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto');
+
+    text {
+	font-family: 'Roboto"; 
+    }
+    
+</style>
+
+<body>
+
+    <div class='container graph'></div>
+    <div class='container'>
+	    <br>
+	    <center>
+	    <div class="btn-group" role="group" aria-label="...">
+		<button type="button" class="btn btn-default disabled">
+			<strong> Choose a Account : </strong></button>
+		<button type="button" class="btn btn-default" onclick="graph('DelhiPolice');">
+			@DelhiPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('MumbaiPolice');">
+			@MumbaiPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('hydcitypolice');">
+			@hydcitypolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('KolkataPolice');">
+			@KolkataPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('punecitypolice');">
+			@puneciypolice</button>
+	    </div> 
+	    </center>
+    </div>
+<script>
+	var data;
+
+
+	//size and margin
+	var basewidth = $('.graph').width()
+	//var basewidth = 700
+	var baseheight = 500
+	//var baseheight = $('.graph').height()
+	var margin = {
+		top: 50,
+		right: 30,
+		bottom: 30,
+		left: 30
+	},
+	width = basewidth - margin.left - margin.right,
+	height = baseheight - margin.top - margin.bottom;
+
+
+	// main canvas
+	var svg = d3.select('.graph')
+	    .append('svg')
+	    .attr('width', width + margin.left + margin.right)
+	    .attr('height', height + margin.top + margin.bottom)
+	var canvas = svg.append("g")
+	    .attr("class", "points")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")	
+	    .append("g")
+	    .attr("transform", "translate("+width/2+","+height/2+")");
+
+	var fill = d3.scaleOrdinal(d3.schemeCategory20b);
+	var sizeValue = function(d) { return d.amt;}, 
+		sizeScale = d3.scaleLinear().range([12,100]), 
+		sizeMap = function(d) { return sizeScale(sizeValue(d));};
+
+	//Draw the word cloud
+	function draw(words) {
+		var cloud = canvas.selectAll("g text")
+				.data(words)
+
+		//Entering words
+		cloud.enter()
+			.append("text")
+			.style("fill", function(d, i) { return fill(i); })
+			.attr("text-anchor", "middle")
+			.style('font-size', "1px")
+			.text(function(d) { return d.text; })
+			.transition()
+			.duration(600)
+			.style("font-size", function(d) { return d.size + "px"; })
+			.attr("transform", function(d) {
+				return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+			})
+			.style("fill-opacity", 1);
+		//Entering and existing words
+		cloud
+			.text(function(d) { return d.text; })
+			.style('font-size', "1px")
+			.transition()
+			.duration(600)
+			.style("font-size", function(d) { return d.size + "px"; })
+			.attr("transform", function(d) {
+				return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+			})
+			.style("fill-opacity", 1);
+
+		//Exiting words
+		cloud.exit()
+			.transition()
+			.duration(200)
+			.style('fill-opacity', 1e-6)
+			.style('font-size', "1px")
+			.remove();
+	}	
+
+	var graph = function(user) {
+		d3.json('top10.json',function(data) {
+			data = data[user]
+			sizeScale.domain([d3.min(data, sizeValue), d3.max(data, sizeValue)]);
+			d3.layout.cloud().size([width,height])//[300, 300])
+				.words(data)
+				.text(function(d) { return d.tag; })
+				.padding(5)
+				.rotate(function() { return 0;})
+				.font("Roboto")
+				.fontSize(sizeMap)
+				.on("end", draw)
+				.start();
+		});
+	}
+	graph("MumbaiPolice")
+
+</script>
+
+
+</body>
+
+</html>
