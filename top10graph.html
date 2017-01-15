@@ -19,8 +19,15 @@
 <style>
     @import url('https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto');
 
-    text {
-	font-family: 'Roboto"; 
+    .words {
+	font-family: 'Roboto'; 
+    }
+    .label {
+	font-size: 20px;
+	font-family: 'Overpass Mono', monospace;
+    }
+    .label-info {
+	font-size: 13px;
     }
     
 </style>
@@ -77,19 +84,35 @@
 	    .append("g")
 	    .attr("transform", "translate("+width/2+","+height/2+")");
 
-	var fill = d3.scaleOrdinal(d3.schemeCategory20b);
+	var fill = d3.scaleOrdinal(d3.schemeCategory10);
 	var sizeValue = function(d) { return d.amt;}, 
 		sizeScale = d3.scaleLinear().range([12,100]), 
 		sizeMap = function(d) { return sizeScale(sizeValue(d));};
 
+	canvas.append("text")
+		.attr("class", "label label-text")
+		.attr("x", width/2)
+		.attr("y", height/2 + margin.bottom -10 )
+		.style("text-anchor", "end")
+	canvas.append("text")
+		.attr("class", "label label-info")
+		.attr("x", -width/2)
+		.attr("y", height/2 + margin.bottom -20 )
+		.style("text-anchor", "start")
+		.text("Number: (mouse over a word to view)")
+
+
 	//Draw the word cloud
 	function draw(words) {
-		var cloud = canvas.selectAll("g text")
+		var cloud = canvas.selectAll(".words")
 				.data(words)
 
 		//Entering words
 		cloud.enter()
 			.append("text")
+			.on("mouseenter", updatedata)
+			.on("mouseleave", removedata)
+			.attr("class", "words")
 			.style("fill", function(d, i) { return fill(i); })
 			.attr("text-anchor", "middle")
 			.style('font-size', "1px")
@@ -126,7 +149,8 @@
 		d3.json('top10.json',function(data) {
 			data = data[user]
 			sizeScale.domain([d3.min(data, sizeValue), d3.max(data, sizeValue)]);
-			d3.layout.cloud().size([width,height])//[300, 300])
+			canvas.select(".label-text").text("~ @"+user);
+			d3.layout.cloud().size([width,height])
 				.words(data)
 				.text(function(d) { return d.tag; })
 				.padding(5)
@@ -138,6 +162,16 @@
 		});
 	}
 	graph("MumbaiPolice")
+
+	var updatedata = function(d) {
+		d3.select('.label-info')
+		.text('Number: '+d['amt'].toString())
+	}
+
+	var removedata = function(d) {
+		d3.select('.label-info')
+		.text('Number: (mouse over a point to view)')
+	}
 
 </script>
 
