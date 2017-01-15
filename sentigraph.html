@@ -1,0 +1,260 @@
+
+
+<html>
+
+<head>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<script src="https://cdn.rawgit.com/jasondavies/d3-cloud/f00a5113/build/d3.layout.cloud.js">
+
+	</script>
+
+
+	<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto');
+
+    .words {
+	font-family: 'Roboto'; 
+    }
+    .label {
+	font-size: 20px;
+	font-family: 'Overpass Mono', monospace;
+    }
+    .label-info {
+	font-size: 13px;
+    }
+	path.slice{
+		stroke-width:2px;
+	}
+
+	polyline{
+		opacity: .3;
+		stroke: black;
+		stroke-width: 2px;
+		fill: none;
+	}
+    
+</style>
+
+<body>
+
+    <div class='container graph'></div>
+    <div class='container'>
+	    <br>
+	    <center>
+	    <div class="btn-group" role="group" aria-label="...">
+		<button type="button" class="btn btn-default disabled">
+			<strong> Choose a Account : </strong></button>
+		<button type="button" class="btn btn-default" onclick="graph('DelhiPolice');">
+			@DelhiPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('MumbaiPolice');">
+			@MumbaiPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('hydcitypolice');">
+			@hydcitypolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('KolkataPolice');">
+			@KolkataPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('punecitypolice');">
+			@puneciypolice</button>
+	    </div> 
+	    </center>
+    </div>
+<script>
+	var data;
+
+
+	//size and margin
+	var basewidth = $('.graph').width()
+	//var basewidth = 700
+	var baseheight = 500
+	//var baseheight = $('.graph').height()
+	var margin = {
+		top: 50,
+		right: 30,
+		bottom: 30,
+		left: 30
+	},
+	width = basewidth - margin.left - margin.right,
+	height = baseheight - margin.top - margin.bottom;
+
+
+	// main canvas
+	var svg = d3.select('.graph')
+	    .append('svg')
+	    .attr('width', width + margin.left + margin.right)
+	    .attr('height', height + margin.top + margin.bottom)
+	var canvas = svg.append("g")
+	    .attr("class", "points")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")	
+	    .append("g")
+	    .attr("transform", "translate("+width/2+","+height/2+")");
+
+	canvas.append("g")
+		.attr("class", "slices");
+	canvas.append("g")
+		.attr("class", "labelName");
+	canvas.append("g")
+		.attr("class", "labelValue");
+	canvas.append("g")
+		.attr("class", "lines");
+
+	radius = Math.min(width, height) / 2;
+
+	var pie = d3.pie()
+		.sort(null)
+		.value(function(d) {
+			return d.value;
+		});
+
+	var arc = d3.arc()
+		.outerRadius(radius * 0.8)
+		.innerRadius(radius * 0.4);
+
+	var outerArc = d3.arc()
+		.innerRadius(radius * 0.9)
+		.outerRadius(radius * 0.9);
+
+
+	var fill = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+
+	function draw(data) {
+
+		/* ------- PIE SLICES -------*/
+		var slice = canvas.select(".slices").selectAll("path.slice")
+			.data(pie(data), function(d){ return d.data.label });
+
+		slice.enter()
+			.insert("path")
+			.style("fill", function(d) { return fill(d.data.label); })
+			.attr("class", "slice")
+			.transition().duration(1000)
+			.attrTween("d", function(d) {
+				this._current = this._current || d;
+				var interpolate = d3.interpolate(this._current, d);
+				this._current = interpolate(0);
+				return function(t) {
+					return arc(interpolate(t));
+				};
+			})
+
+		slice
+			.transition().duration(1000)
+			.attrTween("d", function(d) {
+				this._current = this._current || d;
+				var interpolate = d3.interpolate(this._current, d);
+				this._current = interpolate(0);
+				return function(t) {
+					return arc(interpolate(t));
+				};
+			})
+
+		slice.exit()
+			.remove();
+
+
+		/* ------- TEXT LABELS -------*/
+
+		var text = canvas.select(".labelName").selectAll("text")
+			.data(pie(data), function(d){ return d.data.label });
+
+		text.enter()
+			.append("text")
+			.attr("dy", ".35em")
+			.text(function(d) {
+				return (d.data.label+": "+d.value);
+			});
+
+		function midAngle(d){
+			return d.startAngle + (d.endAngle - d.startAngle)/2;
+		}
+
+		text
+			.transition().duration(1000)
+			.attrTween("transform", function(d) {
+				this._current = this._current || d;
+				var interpolate = d3.interpolate(this._current, d);
+				this._current = interpolate(0);
+				return function(t) {
+					var d2 = interpolate(t);
+					var pos = outerArc.centroid(d2);
+					pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+					return "translate("+ pos +")";
+				};
+			})
+			.styleTween("text-anchor", function(d){
+				this._current = this._current || d;
+				var interpolate = d3.interpolate(this._current, d);
+				this._current = interpolate(0);
+				return function(t) {
+					var d2 = interpolate(t);
+					return midAngle(d2) < Math.PI ? "start":"end";
+				};
+			})
+			.text(function(d) {
+				return (d.data.label+": "+d.value);
+			});
+
+
+		text.exit()
+			.remove();
+
+		/* ------- SLICE TO TEXT POLYLINES -------*/
+
+		var polyline = canvas.select(".lines").selectAll("polyline")
+			.data(pie(data), function(d){ return d.data.label });
+
+		polyline.enter()
+			.append("polyline");
+
+		polyline.transition().duration(1000)
+			.attrTween("points", function(d){
+			this._current = this._current || d;
+			var interpolate = d3.interpolate(this._current, d);
+			this._current = interpolate(0);
+			return function(t) {
+				var d2 = interpolate(t);
+				var pos = outerArc.centroid(d2);
+				pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+				return [arc.centroid(d2), outerArc.centroid(d2), pos];
+			};
+			});
+
+		polyline.exit()
+			.remove();
+	};
+
+
+	var graph = function(user) {
+		d3.json('sentiment.json',function(data) {
+			data = data[user]
+			data2 = []
+			for(i=0;i<data.length;i++) {
+				key = Object.keys(data[i]);
+				if(key[0] != "neutral"){
+					data2.push({
+						"label": key[0],
+						"value": data[i][key]
+					});
+				}
+			}
+			console.log(data2)
+			draw(data2)
+			draw(data2)
+			});
+	}
+	graph("MumbaiPolice")
+
+</script>
+
+
+</body>
+
+</html>
