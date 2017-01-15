@@ -20,16 +20,11 @@
 <style>
     @import url('https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto');
 
-    .words {
-	font-family: 'Roboto'; 
-    }
     .label {
-	font-size: 20px;
+	font-size: 15px;
 	font-family: 'Overpass Mono', monospace;
     }
-    .label-info {
-	font-size: 13px;
-    }
+    
 	path.slice{
 		stroke-width:2px;
 	}
@@ -121,9 +116,25 @@
 		.outerRadius(radius * 0.9);
 
 
-	var fill = d3.scaleOrdinal(d3.schemeCategory10);
+	//var fill = d3.scaleOrdinal(d3.schemeCategory10);
+	var fill = function(d) {
+		if(d == "negative")
+			return "#FF5252"
+		if(d == "slightly negative")
+			return "#FFAB40"
+		if(d == "mixed")
+			return "#7C4DFF"
+		if(d == "slightly positive")
+			return "#B2FF59"
+		if(d == "positive")
+			return "#00C853"
+	}
 
-
+	canvas.append("text")
+		.attr("class", "label label-text")
+		.attr("x", 0)
+		.attr("y", height/2 + margin.bottom -10 )
+		.style("text-anchor", "middle")
 
 	function draw(data) {
 
@@ -135,16 +146,6 @@
 			.insert("path")
 			.style("fill", function(d) { return fill(d.data.label); })
 			.attr("class", "slice")
-			.transition().duration(1000)
-			.attrTween("d", function(d) {
-				this._current = this._current || d;
-				var interpolate = d3.interpolate(this._current, d);
-				this._current = interpolate(0);
-				return function(t) {
-					return arc(interpolate(t));
-				};
-			})
-
 		slice
 			.transition().duration(1000)
 			.attrTween("d", function(d) {
@@ -243,6 +244,9 @@
 						"label": key[0],
 						"value": data[i][key]
 					});
+				} else {
+					canvas.select(".label-text")
+					.text("With "+data[i][key]+" Neutral   ~ @"+user);
 				}
 			}
 			console.log(data2)
