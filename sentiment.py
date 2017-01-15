@@ -12,7 +12,7 @@ client = MongoClient()
 db = client.precog
 setWorkers(32)
 
-api_key = 'ca8b076b-c513-4c79-b346-7d9b85c8307f'
+api_key = ''
 base_url = 'https://api.havenondemand.com/1/api/sync/analyzesentiment/v2'
 usrs = 'DelhiPolice MumbaiPolice KolkataPolice punecitypolice hydcitypolice'
 session = requests.session()
@@ -24,17 +24,15 @@ def get_sentiment(text, lst):
         d = json.loads(session.get(url).text)
         try:
             lst.append(d['sentiment_analysis'][0]['aggregate']['sentiment'])
+            print 'done: ',text
         except Exception as e:
             print d
-            print text
-            print url
-            print '---'
 
 
 def get_user_sentiments(user):
     lst = list()
     texts = [x['text'] for x in db[user].find() if len(x['text'].split()) > 1]
-    for text in texts[:10]:
+    for text in texts:
         get_sentiment(text, lst)
     Wait()
     counter = Counter(lst)
@@ -44,5 +42,7 @@ def get_user_sentiments(user):
 def get_sentiments():
     return {user: get_user_sentiments(user) for user in usrs.split()}
 
-
-pprint.pprint(get_sentiments())
+data = get_sentiments()
+with open('sentiment.json', 'w') as outfile:
+    json.dump(data, outfile)
+pprint.pprint(data)
