@@ -8,6 +8,11 @@ app = Flask(__name__)
 app.secret_key = 's0mth1ng s3cr3t'
 
 
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+
 @app.route('/freq')
 def freq():
     return render_template('freqgraph.html')

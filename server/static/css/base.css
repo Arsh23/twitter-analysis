@@ -54,3 +54,7 @@ polyline{
 	stroke-width: 2px;
 	fill: none;
 }
+.nav-pills {
+	position: absolute;
+	padding-left: 20px;
+}
