@@ -1,31 +1,14 @@
+{% extends "base.html" %}
+{% block heading %}Sentiment Analysis{% endblock %}
 
 
-<html>
-
-<head>
-	<script src="https://d3js.org/d3.v4.min.js"></script>
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-	<script src="https://cdn.rawgit.com/jasondavies/d3-cloud/f00a5113/build/d3.layout.cloud.js">
-
-	</script>
-
-
-	<script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-      crossorigin="anonymous"></script>
-</head>
+{% block head %}
 <style>
-    @import url('https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto');
-
     .label {
-	font-size: 15px;
+	font-size: 0.9375em !important;
 	font-family: 'Overpass Mono', monospace;
     }
-    
-	path.slice{
+    path.slice{
 		stroke-width:2px;
 	}
 
@@ -35,31 +18,10 @@
 		stroke-width: 2px;
 		fill: none;
 	}
-    
 </style>
+{% endblock %}
 
-<body>
-
-    <div class='container graph'></div>
-    <div class='container'>
-	    <br>
-	    <center>
-	    <div class="btn-group" role="group" aria-label="...">
-		<button type="button" class="btn btn-default disabled">
-			<strong> Choose a Account : </strong></button>
-		<button type="button" class="btn btn-default" onclick="graph('DelhiPolice');">
-			@DelhiPolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('MumbaiPolice');">
-			@MumbaiPolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('hydcitypolice');">
-			@hydcitypolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('KolkataPolice');">
-			@KolkataPolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('punecitypolice');">
-			@puneciypolice</button>
-	    </div> 
-	    </center>
-    </div>
+{% block script %}
 <script>
 	var data;
 
@@ -67,12 +29,12 @@
 	//size and margin
 	var basewidth = $('.graph').width()
 	//var basewidth = 700
-	var baseheight = 500
-	//var baseheight = $('.graph').height()
+	//var baseheight = 500
+	var baseheight = $(window).height()*75 / 100; 
 	var margin = {
-		top: 50,
+		top: 10,
 		right: 30,
-		bottom: 30,
+		bottom: 20,
 		left: 30
 	},
 	width = basewidth - margin.left - margin.right,
@@ -103,6 +65,7 @@
 
 	var pie = d3.pie()
 		.sort(null)
+		.padAngle(.03)
 		.value(function(d) {
 			return d.value;
 		});
@@ -234,7 +197,7 @@
 
 
 	var graph = function(user) {
-		d3.json('sentiment.json',function(data) {
+		d3.json('/get/sentiment',function(data) {
 			data = data[user]
 			data2 = []
 			for(i=0;i<data.length;i++) {
@@ -257,8 +220,4 @@
 	graph("MumbaiPolice")
 
 </script>
-
-
-</body>
-
-</html>
+{% endblock %}

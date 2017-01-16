@@ -1,73 +1,7 @@
-<html>
+{% extends "base.html" %}
+{% block heading %}Frequency of Tweets{% endblock %}
 
-<head>
-	<script src="https://d3js.org/d3.v4.min.js"></script>
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-	<script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-      crossorigin="anonymous"></script>
-</head>
-<style>
-    @import url('https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto');
-
-    .axis text {
-        font-size: 15px;
-	font-family: 'Roboto', sans-serif;
-    }
-
-    .label {
-	font-size: 20px;
-	font-family: 'Overpass Mono', monospace;
-    }
-    .label-info {
-	font-size: 13px;
-    }
-    
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
-
-    .grid line {
-	fill: none;
-	shape-rendering: crispEdges;
-	stroke: black;
-	stroke-width: 1px;
-	opacity: 0.3;
-    }
-    .btn {
-	font-size: 16px;
-	font-family: 'Roboto', sans-serif;
-    }
-</style>
-
-<body>
-
-    <div class='container graph'></div>
-    <div class='container'>
-	    <br>
-	    <center>
-	    <div class="btn-group" role="group" aria-label="...">
-		<button type="button" class="btn btn-default disabled">
-			<strong> Choose a Account : </strong></button>
-		<button type="button" class="btn btn-default" onclick="graph('DelhiPolice');">
-			@DelhiPolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('MumbaiPolice');">
-			@MumbaiPolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('hydcitypolice');">
-			@hydcitypolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('KolkataPolice');">
-			@KolkataPolice</button>
-		<button type="button" class="btn btn-default" onclick="graph('punecitypolice');">
-			@puneciypolice</button>
-	    </div> 
-	    </center>
-    </div>
+{% block script %}
 <script>
 	var data;
 	var selectedcirclecolor;
@@ -76,8 +10,8 @@
 	//size and margin
 	var basewidth = $('.graph').width()
 	//var basewidth = 700
-	var baseheight = 500
-	//var baseheight = $('.graph').height()
+	//var baseheight = 500
+	var baseheight = $(window).height()*75 / 100; 
 	var margin = {
 		top: 30,
 		right: 30,
@@ -230,7 +164,7 @@
 
 	}
 	var graph = function(user) {
-		d3.json('freq.json',function(data) {
+		d3.json("/get/freq",function(data) {
 			data = data[user]
 			console.log(user)
 			initgraph(user,data);
@@ -257,8 +191,4 @@
 		
 
 </script>
-
-
-</body>
-
-</html>
+{% endblock %}

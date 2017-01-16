@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css?family=Overpass+Mono|Roboto');
+
+.graph {
+    height: 75%;
+}
+
+.axis text {
+	font-size: 0.9375em;
+	font-family: 'Roboto', sans-serif;
+}
+
+.label {
+	font-size: 1.25em;
+	font-family: 'Overpass Mono', monospace;
+}
+.label-info {
+	font-size: 0.8125em;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.grid line {
+	fill: none;
+	shape-rendering: crispEdges;
+	stroke: black;
+	stroke-width: 1px;
+	opacity: 0.3;
+}
+.btn {
+	font-size: 1em;
+	font-family: 'Roboto', sans-serif;
+}
+
+.words {
+	font-family: 'Roboto';
+}
+
+h2 { 
+	font-family: 'Roboto';
+}
+
+path.slice{
+	stroke-width:2px;
+}
+
+polyline{
+	opacity: .3;
+	stroke: black;
+	stroke-width: 2px;
+	fill: none;
+}

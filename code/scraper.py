@@ -32,8 +32,9 @@ def extract_tweets(driver, user, num):
             break
         print('Got {} tweets'.format(tweets_count))
         driver.execute_script('window.scrollTo(0,document.body.scrollHeight)')
-        time.sleep(3)
+        time.sleep(5)
 
+    time.sleep(60)
     for tweet in get_tweet_objs(driver):
         if len(tweet.xpath('.//div[@class="context"]//text()')) == 1:
             tweets.append(tweet.xpath('.//div[@class="content"]'))
@@ -51,12 +52,12 @@ def write_to_db(data, user):
     collection.insert_many(data)
 
 if __name__ == '__main__':
-    users = 'DelhiPolice MumbaiPolice KolkataPolice BlrCityPolice hydcitypolice'
+    usrs = 'punecitypolice '
     driver = webdriver.Firefox()
 
-    for user in users.split():
+    for user in usrs.split():
         print('Extracting from {}'.format(user))
-        data = extract_tweets(driver, user, 300)
+        data = extract_tweets(driver, user, 340)
         write_to_db(data, user)
         print('Extracted from {}'.format(user))
     driver.close()

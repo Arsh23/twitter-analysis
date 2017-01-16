@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous">
+	<script  src="https://code.jquery.com/jquery-3.1.1.min.js"
+	integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	crossorigin="anonymous"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/base.css') }}">	
+	{% block head %}
+	{% endblock %}
+</head>
+
+<body>
+
+    <center><h2>{% block heading %}{% endblock %}</h2></center>
+    <div class='container graph'></div>
+    <div class='container'>
+	    <br>
+	    <center>
+	    <div class="btn-group" role="group" aria-label="...">
+		<button type="button" class="btn btn-default disabled">
+			<strong> Choose a Account : </strong></button>
+		<button type="button" class="btn btn-default" onclick="graph('DelhiPolice');">
+			@DelhiPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('MumbaiPolice');">
+			@MumbaiPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('hydcitypolice');">
+			@hydcitypolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('KolkataPolice');">
+			@KolkataPolice</button>
+		<button type="button" class="btn btn-default" onclick="graph('punecitypolice');">
+			@puneciypolice</button>
+	    </div>
+	    </center>
+    </div>
+    {% block script %}{% endblock %}
+</body>
+
+</html>
