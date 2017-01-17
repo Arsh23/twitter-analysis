@@ -1,0 +1,197 @@
+
+{% extends "base.html" %}
+{% block heading %}User Engagement{% endblock %}
+
+{% block head %}
+<style>
+.bar line {
+	stroke: 'black';
+	stroke-width: 1;
+	opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block script %}
+<script>
+	var data;
+
+
+	//size and margin
+	var basewidth = $('.graph').width()
+	//var basewidth = 700
+	//var baseheight = 500
+	var baseheight = $(window).height()*75 /100;
+	var margin = {
+		top: 20,
+		right: 90,
+		bottom: 30,
+		left: 190
+	},
+	width = basewidth - margin.left - margin.right,
+	height = baseheight - margin.top - margin.bottom;
+
+
+	// main canvas
+	var svg = d3.select('.graph')
+	    .append('svg')
+	    .attr('width', width + margin.left + margin.right)
+	    .attr('height', height + margin.top + margin.bottom)
+	var canvas = svg.append("g")
+	    .attr("class", "points")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")	
+
+	var barHeight = height/12;
+
+	// setup x 
+	var xValue = function(d) { return d.value;}, 
+	    xScale = d3.scaleLinear().range([0, width]), 
+	    xMap = function(d) { return xScale(xValue(d));}, 
+	    xAxis = d3.axisBottom().scale(xScale)
+
+	canvas.append("text")
+	.attr("class", "label label-info")
+	.attr("x", width/2)
+	.attr("y", height)
+	.style("text-anchor", "middle")
+	.text('Assumption: Tweets containing atmost 3 words with an Image are considered Image only')
+	canvas.append("text")
+	.attr("class", "label label-text")
+	.attr("x", width+margin.right/2+20)
+	.attr("y", height + margin.bottom -10 )
+	.style("text-anchor", "end")
+
+	// draw visual look lines
+	for(i=0;i<6;i+=2) {
+		canvas.append('line')
+			.attr('x1',-10)
+			.attr('y1',i * (barHeight*2)-10)
+			.attr('x2',-10)
+			.attr('y2',(i+1) * barHeight*2 +barHeight + 10)
+	}
+	for(i=0;i<6;i+=2) {
+		canvas.append('line')
+			.attr('x1',width+margin.right-5)
+			.attr('y1',i * (barHeight*2)-10)
+			.attr('x2',width+margin.right-5)
+			.attr('y2',(i+1) * barHeight*2 +barHeight + 10)
+	}
+	for(i=0;i<6;i++) {
+		if(i%2==0) {
+			canvas.append('line')
+				.attr('x1',-10)
+				.attr('y1',i * (barHeight*2)-10)
+				.attr('x2',20)
+				.attr('y2',i * (barHeight*2)-10)
+		} else {
+			canvas.append('line')
+				.attr('x1',-10)
+				.attr('y1',i * (barHeight*2) +barHeight +10)
+				.attr('x2',20)
+				.attr('y2',i * (barHeight*2) +barHeight +10)	
+		}
+	}
+	for(i=0;i<6;i++) {
+		if(i%2==0) {
+			canvas.append('line')
+				.attr('x1',width+margin.right-5)
+				.attr('y1',i * (barHeight*2)-10)
+				.attr('x2',width+margin.right-25)
+				.attr('y2',i * (barHeight*2)-10)
+		} else {
+			canvas.append('line')
+				.attr('x1',width+margin.right-5)
+				.attr('y1',i * (barHeight*2) +barHeight +10)
+				.attr('x2',width+margin.right-25)
+				.attr('y2',i * (barHeight*2) +barHeight +10)	
+		}
+	}
+	
+
+	canvas.selectAll('line')
+		.attr('stroke','black')
+		.attr('stroke-width',1)
+
+	var draw = function(data) {
+		var bar = canvas.selectAll('.bar')
+				.data(data)
+			
+			bar.exit().remove()
+
+			var g = bar.enter()
+			.append('g')
+			.attr('class','bar')
+			.attr("transform", function(d, i) { return "translate(0," + i * barHeight * 2 + ")"; })
+
+			g.append('text')
+			g.append("rect")
+			g.append('text')
+			.attr('class','label')
+			.style('text-anchor','end')
+			.attr('x',-20)
+			.attr('y',function(d,i) {
+				if(i%2==0)
+					return +barHeight+barHeight/2
+			}) 
+			.text(function(d,i) {
+				if(i%2==0) {
+					if(d.label.split('_')[0] == 'both')
+						return 'Text & Image'
+					if(d.label.split('_')[0] == 'text')
+						return 'Text Only'
+					if(d.label.split('_')[0] == 'imgs')
+						return 'Image Only'
+				}
+			})
+
+
+			bar.select('rect')
+			.style('fill',function(d) {
+				if(d.label.split('_')[1] == 'lk')
+					return '#ef6548'
+				else
+					return '#74a9cf'
+					})
+			.transition().duration(600)
+			.attr("width", xMap)
+			.attr("height", barHeight);
+
+			bar.select("text")
+			.transition().duration(600)
+			.attr("x", function(d) { return xMap(d) + 3; })
+			.attr("y", barHeight / 2)
+			.attr("dy", ".35em")
+			.text(function(d) { 
+				if(d.label.split('_')[1] == 'lk')
+					return 'Likes: '+d.value
+				else
+					return 'Retweets: '+d.value
+					 });
+
+
+
+
+	}
+
+	var graph = function(user) {
+		d3.json('/get/eng',function(data) {
+			data = data[user]
+			data2 = []
+			for(i=0;i<data.length;i++) {
+				key = Object.keys(data[i]);
+				data2.push({
+					"label": key[0],
+					"value": data[i][key]
+				});
+			}
+			data = data2
+			canvas.select(".label-text").text("~ @"+user);
+			xScale.domain([0, d3.max(data, xValue)]);
+			draw(data)
+			draw(data)
+		});
+	}
+	graph("MumbaiPolice")
+
+</script>
+{% endblock %}

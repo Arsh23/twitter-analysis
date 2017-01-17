@@ -28,9 +28,14 @@ def sentiment():
     return render_template('sentigraph.html')
 
 
+@app.route('/engagement')
+def engagement():
+    return render_template('engagement.html')
+
+
 @app.route('/get/<file>')
 def get(file):
-    if file in ['freq', 'top10', 'sentiment']:
+    if file in ['freq', 'top10', 'sentiment', 'eng']:
         with open('static/data/'+file+'.json') as f:
             data = json.load(f)
         return jsonify(data)
