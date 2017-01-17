@@ -37,23 +37,35 @@ def get_freq(users):
     return {user: calc_freq(user) for user in users.split()}
 
 
-'''
-for user in usrs.split():
-    tweets = db[user].find({'contains_imgs':True})
-    for tweet in tweets:
-        text = re.sub(r"pic.twitter.com\/[\w\d]+(?:\s|$)", '', tweet['text'])
-        if len(text.split()) <=3:
-            # print user,text, tweet['contains_imgs']
-            pass
+def get_other_data(user, key, has_img):
+    tweets = db[user].find({'contains_imgs': True if has_img else False})
+    strs = (x[key].split()[0] for x in tweets if x[key].split() != [])
+    return sum(int(x) if x[-1:] != 'K' else float(x[:-1])*1000 for x in strs)
 
-def calc_egmt(user):
-    i = db[user].find({'contains_imgs':True})
-    # regex =
-    t = (re.sub(r"pic.twitter.com\/[\w\d]+(?:\s|$)", '', x['text']) for x in i)
-    print len(t)
 
-for user in usrs.split():
-    calc_egmt(user)
-'''
-pprint.pprint(get_top10(usrs))
-pprint.pprint(get_freq(usrs))
+def get_img_only(user, key):
+    tweets = db[user].find({'contains_imgs': True})
+    regex = r"pic.twitter.com\/[\w\d]+(?:\s|$)"
+    t = (x for x in tweets if len(re.sub(regex, '', x['text']).split()) < 4)
+    strs = (x[key].split()[0] for x in t if x[key].split() != [])
+    return sum(int(x) if x[-1:] != 'K' else float(x[:-1])*1000 for x in strs)
+
+
+def get_user_eng(user):
+    data = list()
+    data.append({'text_rt': get_other_data(user, 'retweets', False)})
+    data.append({'text_lk': get_other_data(user, 'likes', False)})
+    data.append({'both_rt': get_other_data(user, 'retweets', True)})
+    data.append({'both_lk': get_other_data(user, 'likes', True)})
+    data.append({'imgs_rt': get_img_only(user, 'retweets')})
+    data.append({'imgs_lk': get_img_only(user, 'likes')})
+    return data
+
+
+def get_engagement(users):
+    return {user: get_user_eng(user) for user in users.split()}
+
+
+# pprint.pprint(get_top10(usrs))
+# pprint.pprint(get_freq(usrs))
+pprint.pprint(get_engagement(usrs))
