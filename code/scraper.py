@@ -9,6 +9,7 @@ from pymongo import MongoClient
 
 client = MongoClient()
 db = client.precog
+users = 'DelhiPolice MumbaiPolice KolkataPolice punecitypolice hydcitypolice'
 
 
 def get_tweet_objs(driver):
@@ -34,13 +35,10 @@ def extract_tweets(driver, user, num):
         driver.execute_script('window.scrollTo(0,document.body.scrollHeight)')
         time.sleep(5)
 
-    time.sleep(60)
+    time.sleep(30)
     for tweet in get_tweet_objs(driver):
         if len(tweet.xpath('.//div[@class="context"]//text()')) == 1:
             tweets.append(tweet.xpath('.//div[@class="content"]'))
-        # if len(tweets) == num:
-            # print('Extracted {} tweets'.format(num))
-            # break
 
     tweets = [x[0] for x in tweets]
     return parse_tweets(tweets, user)
@@ -52,10 +50,9 @@ def write_to_db(data, user):
     collection.insert_many(data)
 
 if __name__ == '__main__':
-    usrs = 'punecitypolice '
     driver = webdriver.Firefox()
 
-    for user in usrs.split():
+    for user in users.split():
         print('Extracting from {}'.format(user))
         data = extract_tweets(driver, user, 340)
         write_to_db(data, user)

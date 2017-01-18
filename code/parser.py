@@ -2,7 +2,7 @@
 from lxml import html
 
 
-def parse_text(tweet):
+def _parse_text(tweet):
     text = ''
     for elem in tweet.xpath('.//p[contains(@class, "tweet-text")]/node()'):
         if isinstance(elem, html.HtmlElement):
@@ -20,7 +20,7 @@ def parse_tweets(tweets, user):
     for t in tweets:
         tweet = dict()
         tweet['user'] = user
-        tweet['text'] = parse_text(t)
+        tweet['text'] = _parse_text(t)
         tweet['time'] = t.xpath('.//small[@class="time"]/a/@title')[0]
 
         rt_xpath = './/button[contains(@class,"js-actionRetweet")]'\

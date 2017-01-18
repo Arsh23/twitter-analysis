@@ -1,5 +1,6 @@
 
 import re
+import json
 import pprint
 from collections import Counter
 from datetime import datetime as dt
@@ -10,40 +11,40 @@ client = MongoClient()
 db = client.precog
 
 
-usrs = 'DelhiPolice MumbaiPolice KolkataPolice punecitypolice hydcitypolice'
+users = 'DelhiPolice MumbaiPolice KolkataPolice punecitypolice hydcitypolice'
 
 
-def calc_top10(user):
+def _calc_top10(user):
     tweets = db[user].find({'hashtags': {'$gt': []}})
     counter = Counter(tag for tweet in tweets for tag in tweet['hashtags'])
     return [{'tag': x, 'amt': counter[x]} for x in counter.keys()]
 
 
 def get_top10(users):
-    return {user: calc_top10(user) for user in users.split()}
+    return {user: _calc_top10(user) for user in users.split()}
 
 
-def get_dict(x, counter):
+def _get_dict(x, counter):
     return {'day': x.split('-')[0], 'hr': x.split('-')[1], 'amt': counter[x]}
 
 
-def calc_freq(u):
+def _calc_freq(u):
     d = (dt.strptime(x['time'], '%I:%M %p - %d %b %Y') for x in db[u].find())
     counter = Counter('{}-{}'.format(x.weekday(), x.hour) for x in d)
-    return [get_dict(x, counter) for x in counter.keys()]
+    return [_get_dict(x, counter) for x in counter.keys()]
 
 
 def get_freq(users):
-    return {user: calc_freq(user) for user in users.split()}
+    return {user: _calc_freq(user) for user in users.split()}
 
 
-def get_other_data(user, key, has_img):
+def _get_other_data(user, key, has_img):
     tweets = db[user].find({'contains_imgs': True if has_img else False})
     strs = (x[key].split()[0] for x in tweets if x[key].split() != [])
     return sum(int(x) if x[-1:] != 'K' else float(x[:-1])*1000 for x in strs)
 
 
-def get_img_only(user, key):
+def _get_img_only(user, key):
     tweets = db[user].find({'contains_imgs': True})
     regex = r"pic.twitter.com\/[\w\d]+(?:\s|$)"
     t = (x for x in tweets if len(re.sub(regex, '', x['text']).split()) < 4)
@@ -51,21 +52,29 @@ def get_img_only(user, key):
     return sum(int(x) if x[-1:] != 'K' else float(x[:-1])*1000 for x in strs)
 
 
-def get_user_eng(user):
+def _get_user_eng(user):
     data = list()
-    data.append({'text_rt': get_other_data(user, 'retweets', False)})
-    data.append({'text_lk': get_other_data(user, 'likes', False)})
-    data.append({'both_rt': get_other_data(user, 'retweets', True)})
-    data.append({'both_lk': get_other_data(user, 'likes', True)})
-    data.append({'imgs_rt': get_img_only(user, 'retweets')})
-    data.append({'imgs_lk': get_img_only(user, 'likes')})
+    data.append({'text_rt': _get_other_data(user, 'retweets', False)})
+    data.append({'text_lk': _get_other_data(user, 'likes', False)})
+    data.append({'both_rt': _get_other_data(user, 'retweets', True)})
+    data.append({'both_lk': _get_other_data(user, 'likes', True)})
+    data.append({'imgs_rt': _get_img_only(user, 'retweets')})
+    data.append({'imgs_lk': _get_img_only(user, 'likes')})
     return data
 
 
 def get_engagement(users):
-    return {user: get_user_eng(user) for user in users.split()}
+    return {user: _get_user_eng(user) for user in users.split()}
 
 
-# pprint.pprint(get_top10(usrs))
-# pprint.pprint(get_freq(usrs))
-pprint.pprint(get_engagement(usrs))
+with open('freq.json', 'w') as f:
+    json.dump(get_freq(users), f)
+pprint.pprint(get_freq(users))
+
+with open('top10.json', 'w') as f:
+    json.dump(get_top10(users), f)
+pprint.pprint(get_top10(users))
+
+with open('eng.json', 'w') as f:
+    json.dump(get_engagement(users), f)
+pprint.pprint(get_engagement(users))

@@ -9,8 +9,6 @@
 
 	//size and margin
 	var basewidth = $('.graph').width()
-	//var basewidth = 700
-	//var baseheight = 500
 	var baseheight = $(window).height()*75 / 100; 
 	var margin = {
 		top: 30,
@@ -32,7 +30,6 @@
 			else
 				return d3.format("02")(d)
 		})
-		//xScale.domain([d3.min(data, xValue), d3.max(data, xValue)]);
 		xScale.domain([-1,23]);
 
 	// setup y 

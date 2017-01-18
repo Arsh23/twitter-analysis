@@ -28,8 +28,6 @@
 
 	//size and margin
 	var basewidth = $('.graph').width()
-	//var basewidth = 700
-	//var baseheight = 500
 	var baseheight = $(window).height()*75 / 100; 
 	var margin = {
 		top: 10,
@@ -79,7 +77,6 @@
 		.outerRadius(radius * 0.9);
 
 
-	//var fill = d3.scaleOrdinal(d3.schemeCategory10);
 	var fill = function(d) {
 		if(d == "negative")
 			return "#FF5252"
