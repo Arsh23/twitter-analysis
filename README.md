@@ -13,4 +13,4 @@ The raw JSON dump of mongodb database is stored at [/data](https://github.com/Ar
 The JSON files used to build the graphs is present at [/static/data](https://github.com/Arsh23/twitter-analysis/tree/master/static/data)
 
 ------
-This project was build for IIITD's Precog internship application
+This project was built for IIITD's Precog internship application
